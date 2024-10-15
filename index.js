@@ -1,36 +1,37 @@
 const express = require("express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const messagingRealTime = require('./LiveMessagin')
-
-messagingRealTime()
-// Import the Swagger options
+const messagingRealTime = require('./LiveMessagin');
 const swaggerOptions = require("./swaggerOptions");
-const userEndpoint = require('./routes/User')
+const userEndpoint = require('./routes/User');
 const http = require('http');
 const socketIo = require('socket.io');
 
-
+messagingRealTime();  // Initialize the messaging module
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
-const PORT = 1900;
+const io = socketIo(server);  // Initialize Socket.IO
 
+const PORT = 3000;
+
+// Socket.IO connection
+io.on('connection', (socket) => {
+  console.log('Hello, a user connected');  // Log "Hello" on connection
+
+  // Optionally handle disconnect event
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
 
 // Swagger setup
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.use(userEndpoint);
-
-
-// Your other middleware and routes go here
-// app.get("/api/hello", (req, res) => {
-//   res.send("Hello, Swagger!");
-// });
+app.use(userEndpoint);  // Your routes
 
 // Start the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
