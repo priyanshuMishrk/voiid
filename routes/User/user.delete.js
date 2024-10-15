@@ -45,7 +45,7 @@ app.use(express.json());
 // Example route to find a user
 app.delete('/users', tokenGenerator.authorizationToken , async (req, res) => {
     const go = isValidObjectId(req.user.id)
-
+    console.log("hoho")
     try {
         if (go){
             const userInit = await User.findById(req.user.id)

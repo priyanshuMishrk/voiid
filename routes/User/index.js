@@ -5,6 +5,7 @@ const userPatch = require('./user.patch')
 const userName = require('./username.check')
 const userLogin = require('./user.login')
 const userProfo = require('./user.profile')
+const userContact = require('./user.contact.get')
 const array = [
     userApp,
     userPost,
@@ -12,7 +13,8 @@ const array = [
     userPatch,
     userName,
     userLogin,
-    userProfo
+    userProfo,
+    userContact
 ]
 
 module.exports = array
