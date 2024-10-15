@@ -1,10 +1,11 @@
 const express = require('express');
-const User = require('../../models/user.model');
+const Chat = require('../../models/chat.model');
 const connectDB = require('../../db');
 const { createValidator } = require('express-joi-validation');
 const { userSchema } = require('../../joi/user.joi')
 const encryptor = require('../../Utils/Pass')
 const tokenGenerator = require('../../Utils/Authorization')
+const mongoose = require('mongoose');
 
 connectDB()
 
@@ -18,11 +19,19 @@ app.use(express.json());
  * tags:
  *   - name: Chatrooms
  *     description: Operations related to Chatrooms.
-
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ * 
  * /chats:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     tags: 
- *      - Chatrooms
+ *       - Chatrooms
  *     summary: Create a new chat room
  *     description: This endpoint creates a new chat room for the user.
  *     requestBody:
@@ -33,28 +42,28 @@ app.use(express.json());
  *             type: object
  *             properties:
  *               type:
- *                 required: true
- *                 type: enum
- *                 description: the type of chatroom this key tells if its a group chat or a personal chat possible values [private, group]
+ *                 type: string
+ *                 description: The type of chatroom. Possible values are 'private' for personal chat or 'group' for group chat.
  *                 example: private
  *               participants:
- *                 required: true
  *                 type: array
- *                 description: this key will have an array as value consisting ids of all other user in that particular room (important don't include the current user's id as that will be taken from header).
- *                 example: [66e927d41bf19fcac400a97a , 66e9293abe5773da13505932]
+ *                 items:
+ *                   type: string
+ *                 description: An array of IDs of participants in the room. Do not include the current user's ID (which will be taken from the header).
+ *                 example: 
+ *                   - 66e927d41bf19fcac400a97a
+ *                   - 66e9293abe5773da13505932
  *               group_name:
- *                 required: false
  *                 type: string
- *                 description: Only to be sent when starting group chat this will consists the title of group chat.
+ *                 description: Required only for group chats. The name of the group chat.
  *                 example: Walkers
  *               group_image:
- *                 required: false
  *                 type: string
- *                 description: Only to be sent when starting group chat this will consists the image of group chat.
- *                 example: url of image
+ *                 description: Required only for group chats. The URL of the group chat image.
+ *                 example: https://example.com/group_image.jpg
  *     responses:
  *       201:
- *         description: Chat room created successfully will return all data of chatroom.
+ *         description: Chat room created successfully. Returns the chatroom data.
  *       400:
  *         description: Invalid input, object invalid.
  *       401:
@@ -64,81 +73,52 @@ app.use(express.json());
  */
 
 // Example route to find a user
-app.post('/chats', tokenGenerator.authorizationToken , async (req, res) => {
-
+app.post('/chats', tokenGenerator.authorizationToken, async (req, res) => {
     try {
         const {
             type,
             participants,
             group_name,
             group_image
-        } = req.body
+        } = req.body;
 
-        if (type === 'private' && participants.length > 2){
-            res.send('The chatroom consists multiple user but the chatroom is set a private')
+        // Ensure type is valid
+        if (type === 'private' && participants.length > 2) {
+            return res.status(400).send('The chatroom consists of multiple users but the chatroom type is set as private.');
         }
 
-        const data = {
+        // Validate participants array
+        if (!Array.isArray(participants) || participants.length === 0) {
+            return res.status(400).json({ message: 'Participants array is required and cannot be empty.' });
+        }
+
+        // Get the current user from the authorization token (assumed to be set in middleware)
+        const currentUserId = req.user._id;  // Assuming the token middleware sets req.user
+        participants.push(currentUserId);  // Add the current user to participants
+
+        // Prepare the chatroom data
+        const chatData = {
+            _id: new mongoose.Types.ObjectId(),
             type,
             participants,
-            group_image,
-            group_name
+            group_name: type === 'group' ? group_name : undefined,  // Only for group chats
+            group_image: type === 'group' ? group_image : undefined,  // Only for group chats
+            admin: type === 'group' ? currentUserId : undefined,  // Admin for group chats is the creator
+            created_at: Date.now()
         };
 
-        // Check for existing username
-        const existingUsername = await User.findOne({ username });
-        if (existingUsername) {
-            return res.status(400).json({
-                message: 'Username already exists.'
-            });
-        }
+        // Create new chatroom
+        const newChat = new Chat(chatData);
+        await newChat.save();
 
-        // Check for existing email or phone number
-        const existingEmailOrPhone = await User.findOne({
-            $or: [
-                { mail },
-                { phNo }
-            ]
+        // Send response with the created chatroom data
+        res.status(201).json({
+            message: 'Chatroom created successfully',
+            chat: newChat
         });
-        if (existingEmailOrPhone) {
-            return res.status(400).json({
-                message: 'Email or phone number already exists.'
-            });
-        }
-
-        const newArr = []
-
-        newArr.push(data)
-
-        const user = await User.insertMany(newArr)
-        console.log(user)
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const responseData = {
-            id : user[0].id,
-            username: user[0].username,
-            mail : user[0].mail,
-            phNo:  user[0].phNo,
-            about: user[0].about,
-            img : user[0].img
-        }
-
-        const dataToken = {
-            id : user[0].id,
-            username: user[0].username,
-            mail : user[0].mail,
-            phNo:  user[0].phNo,
-        }
-
-        const token = await tokenGenerator.authenticationToken(dataToken)
-
-
-        res.json({ ...responseData , token});
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });
-        console.log(error)
+        console.error(error);
     }
 });
 

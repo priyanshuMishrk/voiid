@@ -4,6 +4,7 @@ const swaggerUi = require("swagger-ui-express");
 const messagingRealTime = require('./LiveMessagin');
 const swaggerOptions = require("./swaggerOptions");
 const userEndpoint = require('./routes/User');
+const chatEndpoint = require('./routes/Chatrooms');
 const http = require('http');
 const socketIo = require('socket.io');
 
@@ -28,7 +29,8 @@ io.on('connection', (socket) => {
 // Swagger setup
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.use(userEndpoint);  // Your routes
+app.use(userEndpoint);  
+app.use(chatEndpoint); // Your routes
 
 // Start the server
 server.listen(PORT, () => {
