@@ -3,11 +3,9 @@ const User = require('../../models/user.model');
 const connectDB = require('../../db');
 const { isValidObjectId } = require('../../Utils/Mongoose');
 
-connectDB()
+connectDB();
 
 const app = express();
-
-connectDB();
 
 app.use(express.json());
 
@@ -18,33 +16,35 @@ app.use(express.json());
  *     description: Operations related to users.
 
  * /users/contacts/search:
- *   get:
+ *   post:
  *     tags:
  *       - User
  *     summary: Get users by phone numbers
- *     parameters:
- *       - in: query
- *         name: numbers
- *         required: true
- *         schema:
- *           type: array
- *           items:
- *             type: string
- *         description: List of phone numbers to search for users
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               numbers:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of phone numbers to search for users
  *     responses:
  *       200:
  *         description: A list of user data matching the phone numbers
  *       500:
  *         description: Server error
  *       404:
- *         description: No number exists in the request
+ *         description: No users found for the provided numbers
  */
-// Example route to find a user
-app.get('/users/contacts/search', async (req, res) => {
+// Example route to find users by phone numbers
+app.post('/users/contacts/search', async (req, res) => {
     try {
-        const go = req.query.numbers;
+        const go = req.body.numbers;
 
-        // Ensure go is an array
+        // Ensure 'go' is an array of phone numbers
         const numbersArray = Array.isArray(go) ? go : [go];
 
         if (numbersArray.length > 0) {
@@ -72,6 +72,5 @@ app.get('/users/contacts/search', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-
 
 module.exports = app;
