@@ -25,13 +25,14 @@ io.on('connection', (socket) => {
       console.log('Message received from client:', data);
 
       // Process the received data (e.g., modify it, save it, etc.)
-      // const responseMessage = {
-      //     name: data.name,
-      //     message: `Hello ${data.name}, your message was received!`
-      // };
+      const responseMessage = {
+          name: data.name,
+          message: `Hello ${data.userId}, your message was received!`,
+          content : `${Content}`
+      };
 
       // Emit a response back to the client on the same event
-      socket.emit('responseMessage', responseMessage);
+      socket.emit('responseMessage',responseMessage);
   });
 
   socket.on('disconnect', () => {
