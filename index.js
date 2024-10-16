@@ -9,6 +9,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const message = require('./models/message.model');
 const chat = require('./models/chat.model');
+const mongoose = require('mongoose');
 
 messagingRealTime();  // Initialize the messaging module
 
@@ -35,6 +36,7 @@ io.on('connection', (socket) => {
 
       const chatId = data.Chatroom_id
       const messageData = {
+          _id: new mongoose.Types.ObjectId(),
           chat_id: chatId,
           sender: data.userId,
           content: data.Content,
