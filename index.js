@@ -19,6 +19,27 @@ const io = socketIo(server);  // Initialize Socket.IO
 
 const PORT = 3000;
 
+function createChatObject(messagesArray) {
+  if (messagesArray.length === 0) return {};
+
+  // Extract chat_id from the first message object
+  const chatroomId = messagesArray[0].chat_id;
+
+  // Transform each message object to the desired structure
+  const messages = messagesArray.map(msg => ({
+    sender: msg.sender,
+    content: msg.content,
+    timestamp: msg.created_at,
+    read: msg.is_read
+  }));
+
+  // Return the final object
+  return {
+    chatroomid: chatroomId,
+    messages: messages
+  };
+}
+
 // Socket.IO connection
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -28,11 +49,6 @@ io.on('connection', (socket) => {
       console.log('Message received from client:', data);
 
       // Process the received data (e.g., modify it, save it, etc.)
-      const responseMessage = {
-          name: data.name,
-          message: `Hello ${data.userId}, your message was received!`,
-          content : `${data.Content}`
-      };
 
       const chatId = data.Chatroom_id
       const messageData = {
@@ -58,6 +74,9 @@ io.on('connection', (socket) => {
       const allMessages = await message.find({chat_id: chatId})
       console.log(allMessages)
 
+      const responseMessage = createChatObject(allMessages)
+      console.log(responseMessage)
+
       // Emit a response back to the client on the same event
       socket.emit('responseMessage',allMessages);
   });
@@ -78,3 +97,5 @@ server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
+
+
