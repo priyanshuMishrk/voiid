@@ -7,6 +7,8 @@ const userEndpoint = require('./routes/User');
 const chatEndpoint = require('./routes/Chatrooms');
 const http = require('http');
 const socketIo = require('socket.io');
+const message = require('./models/message.model');
+const chat = require('./models/chat.model');
 
 messagingRealTime();  // Initialize the messaging module
 
@@ -21,7 +23,7 @@ io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Listen for 'messageSent' from the client
-  socket.on('messageSent', (data) => {
+  socket.on('messageSent', async (data) => {
       console.log('Message received from client:', data);
 
       // Process the received data (e.g., modify it, save it, etc.)
@@ -31,8 +33,31 @@ io.on('connection', (socket) => {
           content : `${data.Content}`
       };
 
+      const chatId = data.Chatroom_id
+      const messageData = {
+          chat_id: chatId,
+          sender: data.userId,
+          content: data.Content,
+          message_type: "text",
+          media_url: "",
+          is_read: false,
+          created_at: new Date()
+      };
+
+      // Save the message to the database
+      message.create(messageData)
+      .then(() => {
+          console.log('Message saved to the database');
+      })
+      .catch((error)=> {
+        console.log(error)  
+      })
+
+      const allMessages = await message.find({chat_id: chatId})
+      console.log(allMessages)
+
       // Emit a response back to the client on the same event
-      socket.emit('responseMessage',responseMessage);
+      socket.emit('responseMessage',allMessages);
   });
 
   socket.on('disconnect', () => {

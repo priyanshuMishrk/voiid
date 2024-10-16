@@ -16,3 +16,16 @@ const chatSchema = new Schema({
 const Chat = mongoose.model('Chat', chatSchema);
 
 module.exports = Chat;
+
+// {
+//   chatroomid : ,
+//   messages :[
+//     {
+//       sender : ,
+//       content : ,
+//       timestamp : ,
+//       // type : ,
+//       // status : ,
+//       read : ,
+//   ] 
+// }
