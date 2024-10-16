@@ -28,7 +28,7 @@ io.on('connection', (socket) => {
       const responseMessage = {
           name: data.name,
           message: `Hello ${data.userId}, your message was received!`,
-          content : `${Content}`
+          content : `${data.Content}`
       };
 
       // Emit a response back to the client on the same event
