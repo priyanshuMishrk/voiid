@@ -18,11 +18,24 @@ const PORT = 3000;
 
 // Socket.IO connection
 io.on('connection', (socket) => {
-  console.log('Hello, a user connected');  // Log "Hello" on connection
+  console.log('A user connected');
 
-  // Optionally handle disconnect event
+  // Listen for 'messageSent' from the client
+  socket.on('messageSent', (data) => {
+      console.log('Message received from client:', data);
+
+      // Process the received data (e.g., modify it, save it, etc.)
+      // const responseMessage = {
+      //     name: data.name,
+      //     message: `Hello ${data.name}, your message was received!`
+      // };
+
+      // Emit a response back to the client on the same event
+      socket.emit('responseMessage', responseMessage);
+  });
+
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+      console.log('User disconnected');
   });
 });
 
