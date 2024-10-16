@@ -9,6 +9,7 @@ const messageSchema = new Schema({
     message_type: { type: String, enum: ['text', 'image', 'video', 'file'], default: 'text' },  // Message type
     media_url: { type: String },  // If it's an image, video, or file, store the URL here
     is_read: { type: Boolean, default: false },  // Read status of the message
+    deleted: { type: Boolean, default: false },
     created_at: { type: Date, default: Date.now }
   });
 

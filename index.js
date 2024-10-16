@@ -1,7 +1,7 @@
 const express = require("express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const messagingRealTime = require('./LiveMessagin');
+// const messagingRealTime = require('./LiveMessagin');
 const swaggerOptions = require("./swaggerOptions");
 const userEndpoint = require('./routes/User');
 const chatEndpoint = require('./routes/Chatrooms');
@@ -11,7 +11,7 @@ const message = require('./models/message.model');
 const chat = require('./models/chat.model');
 const mongoose = require('mongoose');
 
-messagingRealTime();  // Initialize the messaging module
+// messagingRealTime();  // Initialize the messaging module
 
 const app = express();
 const server = http.createServer(app);
