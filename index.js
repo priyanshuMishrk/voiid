@@ -81,6 +81,42 @@ io.on('connection', (socket) => {
       socket.emit('responseMessage',allMessages);
   });
 
+  socket.on('userEnter', async (userId) => {
+    console.log('User entered:', userId);
+  
+    try {
+      // Find all chatrooms where the user is a participant
+      const userChats = await chat.find({ participants: userId });
+  
+      if (userChats.length > 0) {
+        console.log(`User ${userId} is part of the following chatrooms:`);
+        console.log(userChats);
+  
+        // Emit the list of chatrooms back to the user
+        socket.emit('userChatRooms', userChats);
+      } else {
+        console.log(`No chatrooms found for user ${userId}`);
+        socket.emit('userChatRooms', []);  // Send an empty array if no chatrooms are found
+      }
+  
+    } catch (error) {
+      console.error('Error finding chatrooms for user:', error);
+      socket.emit('error', 'Failed to load chatrooms');
+    }
+  });
+
+  // Listen for 'userChat' from the client
+  socket.on('userChat', async (chatroomId) => {
+    console.log('Chatroom accessed by user:', chatroomId);
+
+    // Fetch all messages from the chatroom
+    const chatMessages = await message.find({ chat_id: chatroomId });
+    const responseMessage = createChatObject(chatMessages)
+
+    // Send the chatroom messages back to the user
+    socket.emit('chatroomMessages', responseMessage);
+  });
+
   socket.on('disconnect', () => {
       console.log('User disconnected');
   });
