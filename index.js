@@ -78,7 +78,8 @@ io.on('connection', (socket) => {
       console.log(responseMessage)
 
       // Emit a response back to the client on the same event
-      socket.emit('responseMessage',allMessages);
+      // socket.emit('responseMessage',allMessages);
+      io.to(chatId).emit('responseMessage',allMessages);
   });
 
   socket.on('userEnter', async (userId) => {
