@@ -50,14 +50,26 @@ io.on('connection', (socket) => {
 
       // Process the received data (e.g., modify it, save it, etc.)
 
-      const chatId = data.Chatroom_id
+      // {
+      //   0|index  |   chat_id: '6710c1be58c2cd01f75bad75',
+      //   0|index  |   sender: '6710c0bd58c2cd01f75bab73',
+      //   0|index  |   content: 'hey',
+      //   0|index  |   message_type: 'image',
+      //   0|index  |   media_url: 'https://res.cloudinary.com/black-box/image/upload/v1729148384/voiidChat/chatImages.jpg',
+      //   0|index  |   is_read: false,
+      //   0|index  |   deleted: false,
+      //   0|index  |   created_at: '2024-10-17T15:05:59.984665',
+      //   0|index  |   room: '6710c1be58c2cd01f75bad75'
+      //   0|index  | }
+
+      const chatId = data.chat_id
       const messageData = {
           _id: new mongoose.Types.ObjectId(),
           chat_id: chatId,
           sender: data.userId,
-          content: data.Content,
-          message_type: "text",
-          media_url: "",
+          content: data.content ? data.content : '',
+          message_type: data.message_type ? data.message_type : "text",
+          media_url: data.media_url ? data.media_url : '',
           is_read: false,
           created_at: new Date()
       };
