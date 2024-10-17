@@ -77,13 +77,13 @@ io.on('connection', (socket) => {
       };
 
       // Save the message to the database
-      message.create(messageData)
-      .then(() => {
-          console.log('Message saved to the database');
-      })
-      .catch((error)=> {
-        console.log(error)  
-      })
+      const messageLatest = await message.create(messageData)
+      // .then(() => {
+      //     console.log('Message saved to the database');
+      // })
+      // .catch((error)=> {
+      //   console.log(error)  
+      // })
 
       const allMessages = await message.find({chat_id: chatId}).sort({ createdAt: -1 });
       console.log(allMessages)
