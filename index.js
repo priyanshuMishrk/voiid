@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
           content: data.content ? data.content : '',
           caption : data.caption ? data.caption : '',
           message_type: data.message_type ? data.message_type : "text",
-          media_url: data.media_url ? data.media_url : '',
+          media_url: data.mediaUrl ? data.mediaUrl : '',
           is_read: false,
           created_at: new Date()
       };
