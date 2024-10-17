@@ -30,7 +30,9 @@ function createChatObject(messagesArray) {
     sender: msg.sender,
     content: msg.content,
     timestamp: msg.created_at,
-    read: msg.is_read
+    read: msg.is_read,
+    mediaUrl: msg.media_url || '',          // Store media_url or empty string if not present
+    messageType: msg.message_type || ''     // Store message_type or empty string if not present
   }));
 
   // Return the final object
