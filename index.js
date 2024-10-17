@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
       const messageData = {
           _id: new mongoose.Types.ObjectId(),
           chat_id: chatId,
-          sender: data.sender,
+          sender: data.userId,
           content: data.content ? data.content : '',
           message_type: data.message_type ? data.message_type : "text",
           media_url: data.media_url ? data.media_url : '',
