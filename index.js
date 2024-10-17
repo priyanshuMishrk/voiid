@@ -32,7 +32,8 @@ function createChatObject(messagesArray) {
     timestamp: msg.created_at,
     read: msg.is_read,
     mediaUrl: msg.media_url || '',          // Store media_url or empty string if not present
-    messageType: msg.message_type || ''     // Store message_type or empty string if not present
+    messageType: msg.message_type || '' ,    // Store message_type or empty string if not present
+    caption : msg.caption || '',  
   }));
 
   // Return the final object
@@ -70,6 +71,7 @@ io.on('connection', (socket) => {
           chat_id: chatId,
           sender: data.userId,
           content: data.content ? data.content : '',
+          caption : data.caption ? data.caption : '',
           message_type: data.message_type ? data.message_type : "text",
           media_url: data.media_url ? data.media_url : '',
           is_read: false,
