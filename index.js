@@ -85,7 +85,7 @@ io.on('connection', (socket) => {
         console.log(error)  
       })
 
-      const allMessages = await message.find({chat_id: chatId})
+      const allMessages = await message.find({chat_id: chatId}).sort({ createdAt: -1 });
       console.log(allMessages)
 
       const responseMessage = createChatObject(allMessages)
