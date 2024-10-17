@@ -83,20 +83,20 @@ io.on('connection', (socket) => {
   });
 
   socket.on('userEnter', async (userId) => {
-    console.log('User entered:', userId);
+    // console.log('User entered:', userId);
   
     try {
       // Find all chatrooms where the user is a participant
       const userChats = await chat.find({ participants: userId });
   
       if (userChats.length > 0) {
-        console.log(`User ${userId} is part of the following chatrooms:`);
-        console.log(userChats);
+        // console.log(`User ${userId} is part of the following chatrooms:`);
+        // console.log(userChats);
   
         // Emit the list of chatrooms back to the user
         socket.emit('userChatRooms', userChats);
       } else {
-        console.log(`No chatrooms found for user ${userId}`);
+        // console.log(`No chatrooms found for user ${userId}`);
         socket.emit('userChatRooms', []);  // Send an empty array if no chatrooms are found
       }
   
@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 
   // Listen for 'userChat' from the client
   socket.on('userChat', async (chatroomId) => {
-    console.log('Chatroom accessed by user:', chatroomId);
+    // console.log('Chatroom accessed by user:', chatroomId);
 
     // Fetch all messages from the chatroom
     const chatMessages = await message.find({ chat_id: chatroomId });
@@ -120,6 +120,27 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
       console.log('User disconnected');
+  });
+
+  // User joins a room
+  socket.on('join-room', (roomId) => {
+    socket.join(roomId);
+    socket.broadcast.to(roomId).emit('user-joined', socket.id);
+  });
+
+  // Relay signaling messages
+  socket.on('signal', (data) => {
+    const { roomId, signalData, to } = data;
+    io.to(to).emit('signal', {
+      from: socket.id,
+      signalData,
+    });
+  });
+
+  // User disconnects
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    socket.broadcast.emit('user-left', socket.id);
   });
 });
 
