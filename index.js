@@ -130,9 +130,11 @@ io.on('connection', (socket) => {
       _id: new mongoose.Types.ObjectId(),
       chat_id: chatId,
       sender: data.userId,
+      content: data.content ? data.content : '',  
       message_type: 'audio',
       media_url: data.mediaUrl ? data.mediaUrl : '',  // Assuming the client sends a URL of the audio clip
       is_read: false,
+      caption : data.caption ? data.caption : '',
       created_at: new Date(),
     };
 
