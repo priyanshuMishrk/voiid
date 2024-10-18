@@ -122,8 +122,36 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('audioClipSent', async (data) => {
+    console.log('Audio clip received:', data);
+
+    const chatId = data.chat_id;
+    const audioMessageData = {
+      _id: new mongoose.Types.ObjectId(),
+      chat_id: chatId,
+      sender: data.userId,
+      message_type: 'audio',
+      media_url: data.mediaUrl ? data.mediaUrl : '',  // Assuming the client sends a URL of the audio clip
+      is_read: false,
+      created_at: new Date(),
+    };
+
+    // Save the audio clip message to the database
+    const savedAudioMessage = await message.create(audioMessageData);
+
+    // Retrieve all messages including the new audio clip for the chat room
+    const allMessages = await message.find({ chat_id: chatId }).sort({ created_at: -1 });
+
+    const responseMessage = createChatObject(allMessages);
+    // console.log(responseMessage);
+
+    // Emit the updated messages to all clients in the chat room
+    io.to(chatId).emit('responseMessage', responseMessage);
+  });
+
   // Listen for 'userChat' from the client
   socket.on('userChat', async (chatroomId) => {
+    socket.join(chatroomId);
     // console.log('Chatroom accessed by user:', chatroomId);
 
     // Fetch all messages from the chatroom
