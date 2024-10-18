@@ -31,7 +31,8 @@ function createChatObject(messagesArray) {
     content: msg.content,
     timestamp: msg.created_at,
     read: msg.is_read,
-    mediaUrl: msg.media_url || '',          // Store media_url or empty string if not present
+    mediaUrl: msg.media_url || '', 
+    audio_url :  msg.audio_url || '',         // Store media_url or empty string if not present
     messageType: msg.message_type || '' ,    // Store message_type or empty string if not present
     caption : msg.caption || '',  
   }));
@@ -132,7 +133,8 @@ io.on('connection', (socket) => {
       sender: data.userId,
       content: data.content ? data.content : '',  
       message_type: 'audio',
-      media_url: data.mediaUrl ? data.mediaUrl : '',  // Assuming the client sends a URL of the audio clip
+      media_url: data.mediaUrl ? data.mediaUrl : '',
+      audio_url : data.audio_url ? data.audio_url : '',  // Assuming the client sends a URL of the audio clip
       is_read: false,
       caption : data.caption ? data.caption : '',
       created_at: new Date(),
