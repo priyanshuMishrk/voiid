@@ -12,6 +12,7 @@ const chat = require('./models/chat.model');
 const mongoose = require('mongoose');
 
 // messagingRealTime();  // Initialize the messaging module
+const rooms = new Map();
 
 const app = express();
 const server = http.createServer(app);
