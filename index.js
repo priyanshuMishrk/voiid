@@ -228,7 +228,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    socket.join(roomId);
+    // socket.join(roomId);
     // Clean up any rooms the user was in
     rooms.forEach((participants, roomId) => {
       if (participants.has(socket.id)) {
