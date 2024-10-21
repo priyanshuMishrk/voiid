@@ -166,30 +166,75 @@ io.on('connection', (socket) => {
     socket.emit('chatroomMessages', responseMessage);
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect-app', () => {
       console.log('User disconnected');
   });
 
-  // User joins a room
-  socket.on('join-room', (roomId) => {
+ socket.on('join-room', (roomId) => {
     socket.join(roomId);
-    socket.broadcast.to(roomId).emit('user-joined', socket.id);
+    if (!rooms.has(roomId)) {
+      rooms.set(roomId, new Set());
+    }
+    rooms.get(roomId).add(socket.id);
+    // console.log(User ${socket.id} joined room ${roomId});
   });
 
-  // Relay signaling messages
+  socket.on('initiate-call', (data) => {
+    const { roomId, callerName, receiverName } = data;
+    socket.to(roomId).emit('incoming-call', { callerName, roomId });
+    // console.log(Call initiated in room ${roomId} by ${callerName} to ${receiverName});
+  });
+
+  socket.on('accept-call', (data) => {
+    const { roomId } = data;
+    socket.to(roomId).emit('call-accepted', { roomId });
+    // console.log(Call accepted in room ${roomId});
+  });
+
+  socket.on('reject-call', (data) => {
+    const { roomId } = data;
+    socket.to(roomId).emit('call-rejected', { roomId });
+    // console.log(Call rejected in room ${roomId});
+  });
+
   socket.on('signal', (data) => {
-    const { roomId, signalData, to } = data;
-    io.to(to).emit('signal', {
-      from: socket.id,
-      signalData,
-    });
+    const { roomId } = data;
+    socket.to(roomId).emit('signal', data);
+    // console.log(Signaling data sent in room ${roomId});
   });
 
-  // User disconnects
+  socket.on('end-call', (data) => {
+    const { roomId } = data;
+    socket.to(roomId).emit('end-call', { roomId });
+    // console.log(Call ended in room ${roomId});
+    
+    // Clean up the room
+    if (rooms.has(roomId)) {
+      rooms.get(roomId).delete(socket.id);
+      if (rooms.get(roomId).size === 0) {
+        rooms.delete(roomId);
+      }
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    socket.broadcast.emit('user-left', socket.id);
+    
+    // Clean up any rooms the user was in
+    rooms.forEach((participants, roomId) => {
+      if (participants.has(socket.id)) {
+        participants.delete(socket.id);
+        if (participants.size === 0) {
+          rooms.delete(roomId);
+        } else {
+          // Notify other participants that this user has left
+          socket.to(roomId).emit('user-disconnected', { userId: socket.id });
+        }
+      }
+    });
   });
+  //   socket.broadcast.emit('user-left', socket.id);
+  // });
 });
 
 // Swagger setup
