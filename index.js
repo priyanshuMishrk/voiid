@@ -182,6 +182,7 @@ io.on('connection', (socket) => {
 
   socket.on('initiate-call', (data) => {
     const { roomId, callerName, receiverName } = data;
+    console.log(data, 'initiate-call log');
     socket.to(roomId).emit('incoming-call', { callerName, roomId });
     // console.log(Call initiated in room ${roomId} by ${callerName} to ${receiverName});
   });
