@@ -183,19 +183,22 @@ io.on('connection', (socket) => {
   socket.on('initiate-call', (data) => {
     const { roomId, callerName, receiverName } = data;
     console.log(data, 'initiate-call log');
-    socket.to(roomId).emit('incoming-call', { callerName, roomId });
+    socket.join(roomId);
+    io.to(roomId).emit('incoming-call', { callerName, roomId });
     // console.log(Call initiated in room ${roomId} by ${callerName} to ${receiverName});
   });
 
   socket.on('accept-call', (data) => {
     const { roomId } = data;
-    socket.to(roomId).emit('call-accepted', { roomId });
+    socket.join(roomId);
+    io.to(roomId).emit('call-accepted', { roomId });
     // console.log(Call accepted in room ${roomId});
   });
 
   socket.on('reject-call', (data) => {
     const { roomId } = data;
-    socket.to(roomId).emit('call-rejected', { roomId });
+    socket.join(roomId);
+    io.to(roomId).emit('call-rejected', { roomId });
     // console.log(Call rejected in room ${roomId});
   });
 
@@ -203,13 +206,15 @@ io.on('connection', (socket) => {
     const { roomId } = data;
     console.log(`Signaling data received in room ${roomId}`);
     console.log(`Signaling data: ${JSON.stringify(data)}`);
-    socket.to(roomId).emit('signal', data);
+    socket.join(roomId);
+    io.to(roomId).emit('signal', data);
     // console.log(Signaling data sent in room ${roomId});
   });
 
   socket.on('end-call', (data) => {
     const { roomId } = data;
-    socket.to(roomId).emit('end-call', { roomId });
+    socket.join(roomId);
+    io.to(roomId).emit('end-call', { roomId });
     // console.log(Call ended in room ${roomId});
     
     // Clean up the room
@@ -223,7 +228,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    
+    socket.join(roomId);
     // Clean up any rooms the user was in
     rooms.forEach((participants, roomId) => {
       if (participants.has(socket.id)) {
@@ -232,7 +237,7 @@ io.on('connection', (socket) => {
           rooms.delete(roomId);
         } else {
           // Notify other participants that this user has left
-          socket.to(roomId).emit('user-disconnected', { userId: socket.id });
+          io.to(roomId).emit('user-disconnected', { userId: socket.id });
         }
       }
     });
