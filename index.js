@@ -184,7 +184,7 @@ io.on('connection', (socket) => {
     const { roomId, callerName, receiverName } = data;
     console.log(data, 'initiate-call log');
     socket.join(roomId);
-    io.to(roomId).emit('incoming-call', { callerName, roomId });
+    io.to(roomId).emit('incoming-call', { callerName, roomId, receiverName });
     // console.log(Call initiated in room ${roomId} by ${callerName} to ${receiverName});
   });
 
