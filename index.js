@@ -200,6 +200,8 @@ io.on('connection', (socket) => {
 
   socket.on('signal', (data) => {
     const { roomId } = data;
+    console.log(`Signaling data received in room ${roomId}`);
+    console.log(`Signaling data: ${JSON.stringify(data)}`);
     socket.to(roomId).emit('signal', data);
     // console.log(Signaling data sent in room ${roomId});
   });
