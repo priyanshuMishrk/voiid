@@ -74,7 +74,8 @@ io.on('connection', (socket) => {
           sender: data.userId,
           content: data.content ? data.content : '',
           caption : data.caption ? data.caption : '',
-          message_type: data.message_type ? data.message_type : "text",
+          messageType: data.message_type ? data.message_type : "text",
+          audio_url : data.audio_url ? data.audio_url : '',
           media_url: data.mediaUrl ? data.mediaUrl : '',
           is_read: false,
           created_at: new Date()
