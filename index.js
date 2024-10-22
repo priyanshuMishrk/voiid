@@ -91,14 +91,14 @@ io.on('connection', (socket) => {
       // })
 
       const allMessages = await message.find({chat_id: chatId}).sort({ createdAt: -1 });
-      console.log(allMessages)
+      // console.log(allMessages)
 
       const responseMessage = createChatObject(allMessages)
       console.log(responseMessage)
 
       // Emit a response back to the client on the same event
       // socket.emit('responseMessage',allMessages);
-      io.to(chatId).emit('responseMessage',allMessages);
+      io.to(chatId).emit('responseMessage',responseMessage);
   });
 
   socket.on('userEnter', async (userId) => {
