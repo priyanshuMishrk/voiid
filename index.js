@@ -171,6 +171,13 @@ io.on('connection', (socket) => {
       console.log('User disconnected');
   });
 
+
+  socket.on('join-room-app', (data) => {
+    const { roomId, userName } = data;
+    socket.join(roomId);  // Join the user to the chatroom
+    console.log(`${userName} has joined room: ${roomId}`);
+  });
+
  socket.on('join-room', (roomId) => {
     socket.join(roomId);
     if (!rooms.has(roomId)) {
