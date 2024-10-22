@@ -175,6 +175,7 @@ io.on('connection', (socket) => {
 
   socket.on('join-room-app', (data) => {
     const { roomId } = data;
+    console.log(`${roomId} joined by some user`)
     socket.join(roomId);  // Join the user to the chatroom
     // console.log(`${userName} has joined room: ${roomId}`);
   });
