@@ -32,10 +32,10 @@ function createChatObject(messagesArray) {
     content: msg.content,
     timestamp: msg.created_at,
     read: msg.is_read,
-    media_url: msg.media_url || '', 
-    audio_url :  msg.audio_url || '',         // Store media_url or empty string if not present
-    messageType: msg.message_type || '' ,    // Store message_type or empty string if not present
-    caption : msg.caption || '',  
+    media_url: msg.media_url || '',
+    audio_url: msg.audio_url || '',         // Store media_url or empty string if not present
+    messageType: msg.message_type || '',    // Store message_type or empty string if not present
+    caption: msg.caption || '',
   }));
 
   // Return the final object
@@ -51,74 +51,74 @@ io.on('connection', (socket) => {
 
   // Listen for 'messageSent' from the client
   socket.on('messageSent', async (data) => {
-      console.log('Message received from client:', data);
+    console.log('Message received from client:', data);
 
-      // Process the received data (e.g., modify it, save it, etc.)
+    // Process the received data (e.g., modify it, save it, etc.)
 
-      // {
-      //   0|index  |   chat_id: '6710c1be58c2cd01f75bad75',
-      //   0|index  |   sender: '6710c0bd58c2cd01f75bab73',
-      //   0|index  |   content: 'hey',
-      //   0|index  |   message_type: 'image',
-      //   0|index  |   media_url: 'https://res.cloudinary.com/black-box/image/upload/v1729148384/voiidChat/chatImages.jpg',
-      //   0|index  |   is_read: false,
-      //   0|index  |   deleted: false,
-      //   0|index  |   created_at: '2024-10-17T15:05:59.984665',
-      //   0|index  |   room: '6710c1be58c2cd01f75bad75'
-      //   0|index  | }
+    // {
+    //   0|index  |   chat_id: '6710c1be58c2cd01f75bad75',
+    //   0|index  |   sender: '6710c0bd58c2cd01f75bab73',
+    //   0|index  |   content: 'hey',
+    //   0|index  |   message_type: 'image',
+    //   0|index  |   media_url: 'https://res.cloudinary.com/black-box/image/upload/v1729148384/voiidChat/chatImages.jpg',
+    //   0|index  |   is_read: false,
+    //   0|index  |   deleted: false,
+    //   0|index  |   created_at: '2024-10-17T15:05:59.984665',
+    //   0|index  |   room: '6710c1be58c2cd01f75bad75'
+    //   0|index  | }
 
-      const chatId = data.chat_id
-      const messageData = {
-          _id: new mongoose.Types.ObjectId(),
-          chat_id: chatId,
-          sender: data.userId,
-          content: data.content ? data.content : '',
-          caption : data.caption ? data.caption : '',
-          message_type: data.messageType ? data.messageType : "text",
-          audio_url : data.audio_url ? data.audio_url : '',
-          media_url: data.mediaUrl ? data.mediaUrl : '',
-          is_read: false,
-          created_at: new Date()
-      };
+    const chatId = data.chat_id
+    const messageData = {
+      _id: new mongoose.Types.ObjectId(),
+      chat_id: chatId,
+      sender: data.userId,
+      content: data.content ? data.content : '',
+      caption: data.caption ? data.caption : '',
+      message_type: data.messageType ? data.messageType : "text",
+      audio_url: data.audio_url ? data.audio_url : '',
+      media_url: data.mediaUrl ? data.mediaUrl : '',
+      is_read: false,
+      created_at: new Date()
+    };
 
-      // Save the message to the database
-      const messageLatest = await message.create(messageData)
-      // .then(() => {
-      //     console.log('Message saved to the database');
-      // })
-      // .catch((error)=> {
-      //   console.log(error)  
-      // })
+    // Save the message to the database
+    const messageLatest = await message.create(messageData)
+    // .then(() => {
+    //     console.log('Message saved to the database');
+    // })
+    // .catch((error)=> {
+    //   console.log(error)  
+    // })
 
-      const allMessages = await message.find({chat_id: chatId}).sort({ createdAt: -1 });
-      // console.log(allMessages)
+    const allMessages = await message.find({ chat_id: chatId }).sort({ createdAt: -1 });
+    // console.log(allMessages)
 
-      const responseMessage = createChatObject(allMessages)
-      console.log(responseMessage)
+    const responseMessage = createChatObject(allMessages)
+    console.log(responseMessage)
 
-      // Emit a response back to the client on the same event
-      // socket.emit('responseMessage',allMessages);
-      io.to(chatId).emit('responseMessage',responseMessage);
+    // Emit a response back to the client on the same event
+    // socket.emit('responseMessage',allMessages);
+    io.to(chatId).emit('responseMessage', responseMessage);
   });
 
   socket.on('userEnter', async (userId) => {
     // console.log('User entered:', userId);
-  
+
     try {
       // Find all chatrooms where the user is a participant
       const userChats = await chat.find({ participants: userId });
-  
+
       if (userChats.length > 0) {
         // console.log(`User ${userId} is part of the following chatrooms:`);
         // console.log(userChats);
-  
+
         // Emit the list of chatrooms back to the user
         socket.emit('userChatRooms', userChats);
       } else {
         // console.log(`No chatrooms found for user ${userId}`);
         socket.emit('userChatRooms', []);  // Send an empty array if no chatrooms are found
       }
-  
+
     } catch (error) {
       console.error('Error finding chatrooms for user:', error);
       socket.emit('error', 'Failed to load chatrooms');
@@ -133,12 +133,12 @@ io.on('connection', (socket) => {
       _id: new mongoose.Types.ObjectId(),
       chat_id: chatId,
       sender: data.userId,
-      content: data.content ? data.content : '',  
+      content: data.content ? data.content : '',
       message_type: 'audio',
       media_url: data.mediaUrl ? data.mediaUrl : '',
-      audio_url : data.audio_url ? data.audio_url : '',  // Assuming the client sends a URL of the audio clip
+      audio_url: data.audio_url ? data.audio_url : '',  // Assuming the client sends a URL of the audio clip
       is_read: false,
-      caption : data.caption ? data.caption : '',
+      caption: data.caption ? data.caption : '',
       created_at: new Date(),
     };
 
@@ -169,17 +169,17 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect-app', () => {
-      console.log('User disconnected');
+    console.log('User disconnected');
   });
 
 
   socket.on('join-room-app', (data) => {
-    const { roomId, userName } = data;
+    const { roomId } = data;
     socket.join(roomId);  // Join the user to the chatroom
-    console.log(`${userName} has joined room: ${roomId}`);
+    // console.log(`${userName} has joined room: ${roomId}`);
   });
 
- socket.on('join-room', (roomId) => {
+  socket.on('join-room', (roomId) => {
     socket.join(roomId);
     if (!rooms.has(roomId)) {
       rooms.set(roomId, new Set());
@@ -191,7 +191,7 @@ io.on('connection', (socket) => {
   socket.on('initiate-call', (data) => {
     const { roomId, callerName, receiverName } = data;
     console.log(data, 'initiate-call log');
-socket.join(roomId);  
+    socket.join(roomId);
     socket.to(roomId).emit('incoming-call', { callerName, roomId, receiverName });
     // io.to(roomId).emit('incoming-call', { callerName, roomId, receiverName });
     // console.log(Call initiated in room ${roomId} by ${callerName} to ${receiverName});
@@ -225,7 +225,7 @@ socket.join(roomId);
     socket.join(roomId);
     io.to(roomId).emit('end-call', { roomId });
     // console.log(Call ended in room ${roomId});
-    
+
     // Clean up the room
     if (rooms.has(roomId)) {
       rooms.get(roomId).delete(socket.id);
@@ -258,7 +258,7 @@ socket.join(roomId);
 // Swagger setup
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.use(userEndpoint);  
+app.use(userEndpoint);
 app.use(chatEndpoint); // Your routes
 
 // Start the server
